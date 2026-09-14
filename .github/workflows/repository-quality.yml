@@ -12,6 +12,22 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: failuremesh
+          POSTGRES_PASSWORD: synthetic-only
+          POSTGRES_DB: failuremesh
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U failuremesh -d failuremesh"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 10
+    env:
+      FAILUREMESH_TEST_DATABASE_URL: postgres://failuremesh:synthetic-only@127.0.0.1:5432/failuremesh?sslmode=disable
     steps:
       - uses: actions/checkout@v7
         with:
@@ -33,22 +49,10 @@ jobs:
             exit 1
           fi
           go mod verify
-      - name: Go vet and tests when packages exist
+      - name: Go vet and tests
         run: |
-          if list_output="$(go list ./... 2>&1)"; then
-            list_status=0
-          else
-            list_status=$?
-          fi
-          no_packages='go: warning: "./..." matched no packages'
-          if { [ "$list_output" = "$no_packages" ] && { [ "$list_status" -eq 0 ] || [ "$list_status" -eq 1 ]; }; } || { [ "$list_status" -eq 0 ] && [ -z "$list_output" ]; }; then
-            echo 'No Go packages yet (architecture foundation); vet/test have nothing to run.'
-          elif [ "$list_status" -ne 0 ]; then
-            printf '%s\n' "$list_output" >&2
-            exit "$list_status"
-          else
-            go vet ./...
-            go test ./...
-          fi
+          go vet ./...
+          go test ./...
+          go test -race ./...
       - name: Committed whitespace check
         run: git diff --check 4b825dc642cb6eb9a060e54bf8d69288fbee4904 HEAD
