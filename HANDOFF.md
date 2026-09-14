@@ -2,8 +2,9 @@
 
 - Current maturity: **ARCHITECTURE FOUNDATION**.
 - Current phase: **Pre-Phase-1 validation (Gate A)**.
-- Branch: `validation-gate-a-corpus-bootstrap` at Gate A review.
+- Branch: use `git branch --show-current` for current branch state; branch names are transient and are not authoritative project state.
 - Completed work: canonical baseline and Phase 0 engineering specifications remain present. Gate A has ten L0 candidate source records, a focused evidence repair, targeted family-3/10 correction, final family-1/7 evidence pass, an abstraction-fit review, three conceptual reference architecture shapes, and a corrected [REVISE decision](docs/validation/gate-a/decision.md). No product implementation or FailureMesh reproduction occurred.
+- Repository quality gate: local Gate A structure/checkpoint, canonical baseline byte digest, and Markdown-link validators plus isolated tooling tests are documented in [testing strategy](docs/testing-strategy.md) and run in CI. These checks do not verify source-evidence truth. The 8/10 incident decision is unchanged.
 - Current gate: **Validation Gate A — Corpus & Reference Architecture Bootstrap**; current maturity remains **ARCHITECTURE FOUNDATION**.
 - Gate result: **REVISE**. Mechanism-fit coverage is 10/10 exact-family L0 candidate mappings, but canonical public-incident coverage is 8/10. Families 1 and 3 lack qualifying observed-incident evidence after the final targeted search; Apache Iceberg production observations qualify family 10. Unsupported downstream effects remain UNKNOWN; no FailureMesh reproduction or verdict has occurred.
 - Next task: retain the unresolved family-1 and family-3 evidence gaps for a future decision; the final generic incident-search pass is closed and should not be repeated. **Phase 1 is not authorized.** The [Phase 1 first vertical slice](docs/phases/phase-1-first-vertical-slice.md) remains future work. Mechanism fit alone does not establish L1, portability, customer applicability, execution verdicts, production readiness, or market validation.

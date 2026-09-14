@@ -1,0 +1,54 @@
+name: Repository quality
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Gate A and Markdown checks
+        run: |
+          python3 scripts/validate_gate_a.py
+          python3 scripts/check_markdown_links.py
+          python3 -B -m unittest discover -s scripts/tests -v
+      - name: Go formatting and module integrity
+        run: |
+          files="$(gofmt -l .)"
+          if [ -n "$files" ]; then
+            printf 'Unformatted Go files:\n%s\n' "$files"
+            exit 1
+          fi
+          go mod verify
+      - name: Go vet and tests when packages exist
+        run: |
+          if list_output="$(go list ./... 2>&1)"; then
+            list_status=0
+          else
+            list_status=$?
+          fi
+          no_packages='go: warning: "./..." matched no packages'
+          if { [ "$list_output" = "$no_packages" ] && { [ "$list_status" -eq 0 ] || [ "$list_status" -eq 1 ]; }; } || { [ "$list_status" -eq 0 ] && [ -z "$list_output" ]; }; then
+            echo 'No Go packages yet (architecture foundation); vet/test have nothing to run.'
+          elif [ "$list_status" -ne 0 ]; then
+            printf '%s\n' "$list_output" >&2
+            exit "$list_status"
+          else
+            go vet ./...
+            go test ./...
+          fi
+      - name: Committed whitespace check
+        run: git diff --check 4b825dc642cb6eb9a060e54bf8d69288fbee4904 HEAD
