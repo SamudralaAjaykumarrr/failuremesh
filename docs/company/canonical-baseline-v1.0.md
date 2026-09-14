@@ -170,6 +170,8 @@ PFC + AC specifications
 -> pilot
 -> first payment
 
+Completion of the ten-public-observed-incident validation milestone still requires ten qualifying incidents, one per canonical family. Validation completion and bounded engineering entry are separate decisions. Before that milestone is complete, a narrowly defined prototype may be explicitly authorized when mechanism fit for its intended canonical scope is recorded, unresolved incident-evidence gaps remain explicit, execution is local/reference-environment/customer-controlled, and privacy and safety boundaries remain intact. Such authorization does not turn missing evidence into evidence or implicitly change a REVISE validation decision to GO. It does not authorize production fault injection or establish portability, production readiness, market validation, customer applicability, or broad resilience. The specific scope and approval must be recorded separately; no incident-count threshold alone authorizes implementation.
+
 Kill or pivot if applicability remains noisy, false positives destroy trust, engineers refuse to install the runner, failure mechanisms do not transfer, experiments cannot be reproduced, or users see only demo value.
 
 ## Claims discipline

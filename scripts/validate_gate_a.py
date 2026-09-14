@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-BASELINE_SHA256 = "3f204ff171a90df237bef46dda7e24fc72207edc46a2deb9e3e2fc62de686b35"
+BASELINE_SHA256 = "4dac0cacad24bddf8d62322416becc723c0f6aa652929983d1874c9c563ec103"
 INCIDENTS = (
     "01-timeout-after-external-commit.md",
     "02-duplicate-queue-delivery.md",
@@ -131,6 +131,9 @@ def validate(root=ROOT):
         read(root, str(gate / filename), errors)
     decision = read(root, str(gate / "decision.md"), errors)
     handoff = read(root, "HANDOFF.md", errors)
+    disposition = read(root, str(gate / "disposition.md"), errors)
+    phase = read(root, "docs/phases/phase-1-first-vertical-slice.md", errors)
+    change = read(root, "docs/company/baseline-change-001-bounded-phase1-entry.md", errors)
     rows = re.findall(r"^\| \[(\d+) [^]]+\]\(incidents/[^)]+\) \|[^\n]+$", decision, re.MULTILINE)
     if [int(number) for number in rows] != list(range(1, 11)):
         errors.append(f"{gate / 'decision.md'}: expected decision rows for families 1 through 10 in order")
@@ -139,11 +142,25 @@ def validate(root=ROOT):
         require(decision, pattern, f"family {number} decision row (mechanism Yes; canonical {'No' if number in NON_COUNTING else 'Yes'})", str(gate / "decision.md"), errors, re.MULTILINE)
     checks = (
         (decision, str(gate / "decision.md"), ((r"^# Gate A decision: REVISE\s*$", "REVISE decision"), (r"Mechanism-fit coverage: 10/10", "10/10 mechanism fit"), (r"Canonical public-incident coverage: 8/10", "8/10 incident coverage"), (r"Phase 1: NOT AUTHORIZED", "Phase 1 NOT AUTHORIZED"), (r"families \*\*1 and 3\*\*", "unresolved families 1 and 3"))),
-        (handoff, "HANDOFF.md", ((r"Current phase: \*\*Pre-Phase-1 validation \(Gate A\)\*\*", "current Gate A phase"), (r"Gate result: \*\*REVISE\*\*", "REVISE gate result"), (r"Mechanism-fit coverage is 10/10", "10/10 mechanism fit"), (r"canonical public-incident coverage is 8/10", "8/10 incident coverage"), (r"Families 1 and 3 lack", "unresolved families 1 and 3"), (r"Phase 1 is not authorized", "Phase 1 not authorized"))),
+        (handoff, "HANDOFF.md", ((r"Gate result: \*\*REVISE\*\*", "REVISE gate result"), (r"Mechanism-fit coverage is 10/10", "10/10 mechanism fit"), (r"canonical public-incident coverage is 8/10", "8/10 incident coverage"), (r"Families 1 and 3 lack", "unresolved families 1 and 3"), (r"authorizes \*\*only\*\* the \[Phase 1 first vertical slice\]", "bounded prototype authorization"), (r"Broader Phase 1, customer execution, and production execution remain \*\*NOT AUTHORIZED\*\*", "broader execution prohibited"), (r"ten-incident milestone is incomplete", "incomplete incident milestone"), (r"No product code or FailureMesh reproduction exists yet; no applicability or execution verdict has been earned", "no reproduction or verdict"))),
+        (disposition, str(gate / "disposition.md"), ((r"Gate A remains REVISE", "current REVISE"), (r"Mechanism fit remains 10/10", "current mechanism fit"), (r"coverage remains 8/10", "current incident count"), (r"Families 1 and 3 remain unresolved", "unresolved families"), (r"Bounded Phase 1 prototype: AUTHORIZED", "bounded authorization"), (r"Broader Phase 1, customer execution, and production execution: NOT AUTHORIZED", "unscoped execution prohibited"), (r"ten-incident validation milestone remains incomplete", "incomplete milestone"))),
+        (phase, "docs/phases/phase-1-first-vertical-slice.md", ((r"Authorization status: \*\*AUTHORIZED — BOUNDED PROTOTYPE ONLY\*\*", "bounded authorization status"), (r"Gate A remains REVISE", "REVISE status"), (r"8/10 qualifying public observed incidents", "incident count"), (r"families 1 and 3 remain unresolved", "unresolved families"), (r"ten-incident validation milestone is incomplete", "incomplete milestone"), (r"No prototype result by itself establishes", "claims boundary"))),
+        (change, "docs/company/baseline-change-001-bounded-phase1-entry.md", ((r"^# PROPOSED BASELINE CHANGE$", "baseline change label"), (r"APPROVED on 2026-09-14", "explicit approval"), (r"BOUNDED PHASE 1 PROTOTYPE: AUTHORIZED", "authorization"), (r"Gate A remains REVISE", "REVISE preserved"), (r"coverage remains 8/10", "incident count preserved"), (r"families 1 and 3 remain unresolved", "unresolved families"))),
     )
     for content, relative, patterns in checks:
         for pattern, label in patterns:
             require(content, pattern, label, relative, errors, re.IGNORECASE | re.MULTILINE)
+    current = "\n".join((handoff, disposition, phase, change))
+    forbidden = (
+        (r"\bGate A\s*(?::|remains|is|=)\s*GO\b", "false Gate A GO"),
+        (r"\b(?:qualifying|canonical)\s+(?:public\s+)?(?:observed\s+)?incidents?\s*(?::|is|are|remains|coverage is|coverage remains)\s*10/10\b", "false incident coverage"),
+        (r"\b(?:ten[- ](?:public[- ]observed[- ])?incident|incident-validation) milestone (?:is|remains) complete\b", "false milestone completion"),
+        (r"\b(?:all|unbounded|unscoped|broader) Phase 1 (?:is|:|remains) AUTHORIZED\b", "unscoped Phase 1 authorization"),
+        (r"\b(?:customer|production) execution (?:is|:|remains) AUTHORIZED\b", "customer or production authorization"),
+    )
+    for pattern, label in forbidden:
+        if re.search(pattern, current, re.IGNORECASE):
+            errors.append(f"current authorization: contradictory claim: {label}")
     return sorted(set(errors))
 
 

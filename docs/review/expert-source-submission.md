@@ -1,6 +1,6 @@
 # Voluntarily presented public source: family 1 or 3
 
-**Submission does not change Gate A.** This form records a concrete source a reviewer already knows; it is not a request for broad or recurring incident searches. Gate A remains REVISE, mechanism fit 10/10, qualifying incidents 8/10, families 1 and 3 unresolved, and Phase 1 NOT AUTHORIZED until a separate reviewed decision changes them.
+**Submission does not change Gate A.** This form records a concrete source a reviewer already knows; it is not a request for broad or recurring incident searches. Gate A remains REVISE, mechanism fit 10/10, qualifying incidents 8/10, and families 1 and 3 unresolved. The [approved baseline change](../company/baseline-change-001-bounded-phase1-entry.md) authorizes only the bounded first prototype; it does not complete incident validation or authorize broader execution.
 
 Use public material only. Do not submit credentials, customer secrets, private production logs, personal data, confidential postmortems, proprietary code, or restricted customer information. Raw customer/private evidence is not required. A URL is a **PUBLIC SOURCE CLAIM**, not yet a repository-established fact.
 

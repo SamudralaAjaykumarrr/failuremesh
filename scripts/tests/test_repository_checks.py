@@ -18,7 +18,7 @@ class GateATests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
-        for relative in ("docs/company/canonical-baseline-v1.0.md", "HANDOFF.md"):
+        for relative in ("docs/company/canonical-baseline-v1.0.md", "docs/company/baseline-change-001-bounded-phase1-entry.md", "docs/phases/phase-1-first-vertical-slice.md", "HANDOFF.md"):
             destination = self.root / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(REPOSITORY / relative, destination)
@@ -26,6 +26,45 @@ class GateATests(unittest.TestCase):
 
     def test_current_checkpoint_passes(self):
         self.assertEqual([], validate_gate_a.validate(self.root))
+
+    def replace_in(self, relative, old, new):
+        path = self.root / relative
+        original = path.read_text()
+        self.assertIn(old, original)
+        path.write_text(original.replace(old, new))
+
+    def test_historical_revise_cannot_be_changed_to_go(self):
+        self.replace_in("docs/validation/gate-a/decision.md", "# Gate A decision: REVISE", "# Gate A decision: GO")
+        self.assertTrue(any("REVISE decision" in error for error in validate_gate_a.validate(self.root)))
+
+    def test_ten_of_ten_claim_without_records_fails(self):
+        self.replace_in("HANDOFF.md", "canonical public-incident coverage is 8/10", "canonical public-incident coverage is 10/10")
+        self.assertTrue(any("8/10 incident coverage" in error for error in validate_gate_a.validate(self.root)))
+
+    def test_unresolved_families_cannot_be_removed(self):
+        self.replace_in("docs/validation/gate-a/disposition.md", "Families 1 and 3 remain unresolved", "All families resolved")
+        self.assertTrue(any("unresolved families" in error for error in validate_gate_a.validate(self.root)))
+
+    def test_bounded_authorization_cannot_be_removed(self):
+        self.replace_in("docs/phases/phase-1-first-vertical-slice.md", "AUTHORIZED — BOUNDED PROTOTYPE ONLY", "NOT AUTHORIZED")
+        self.assertTrue(any("bounded authorization status" in error for error in validate_gate_a.validate(self.root)))
+
+    def test_unscoped_authorization_fails(self):
+        path = self.root / "HANDOFF.md"
+        path.write_text(path.read_text() + "\nAll Phase 1 is AUTHORIZED. Production execution is AUTHORIZED.\n")
+        errors = validate_gate_a.validate(self.root)
+        self.assertTrue(any("unscoped Phase 1 authorization" in error for error in errors))
+        self.assertTrue(any("customer or production authorization" in error for error in errors))
+
+    def test_false_milestone_completion_fails(self):
+        path = self.root / "HANDOFF.md"
+        path.write_text(path.read_text() + "\nThe ten-incident milestone is complete.\n")
+        self.assertTrue(any("false milestone completion" in error for error in validate_gate_a.validate(self.root)))
+
+    def test_authorization_does_not_imply_reproduction_or_verdict(self):
+        self.assertEqual([], validate_gate_a.validate(self.root))
+        self.replace_in("HANDOFF.md", "No product code or FailureMesh reproduction exists yet; no applicability or execution verdict has been earned", "FailureMesh reproduced the incident and issued EXPOSED")
+        self.assertTrue(any("no reproduction or verdict" in error for error in validate_gate_a.validate(self.root)))
 
     def test_missing_incident_fails(self):
         (self.root / "docs/validation/gate-a/incidents/01-timeout-after-external-commit.md").unlink()
