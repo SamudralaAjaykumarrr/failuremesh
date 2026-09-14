@@ -9,3 +9,5 @@ Phase 0 is complete. **Gate A remains REVISE** with 10/10 exact-family L0 mechan
 V0 is constrained to Go, PostgreSQL, Docker, one CLI, three reference services, ten PFCs, five fault primitives, and one deterministic proof format. The bounded Phase 1 reference uses a Go caller, PostgreSQL, and an in-process payment simulator with an independently committed provider effect.
 
 The first runnable reference flow and exact commands are documented in [Phase 1 local run](docs/phases/phase-1-local-run.md). The separately approved synthetic duplicate-delivery slice is documented in [PFC #2 local run](docs/phases/phase-1-pfc2-local-run.md).
+
+The separately approved [PFC #3 local run](docs/phases/phase-1-pfc3-local-run.md) demonstrates deterministic synthetic stale-worker fencing against PostgreSQL. It remains an L0 candidate and does not close the family-3 Gate A incident gap.

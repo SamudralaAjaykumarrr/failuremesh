@@ -96,7 +96,9 @@ Go, PostgreSQL, Docker, one CLI, three reference services, ten PFCs, five fault 
 
 First vertical slice: timeout-after-external-commit against Go + PostgreSQL + external payment simulator.
 
-Second separately approved bounded executable slice: duplicate queue delivery using a deterministic synthetic queue adapter and PostgreSQL-backed consumer effects. Both slices are local level-1 reference experiments. Broader Phase 1, customer execution, and production execution remain unauthorized; the second slice does not establish queue-provider portability or change Gate A public-incident evidence.
+Second separately approved bounded executable slice: duplicate queue delivery using a deterministic synthetic queue adapter and PostgreSQL-backed consumer effects.
+
+Third separately approved bounded executable slice: stale worker after lease expiry with fencing using deterministic logical expiry, two logical workers, and PostgreSQL-backed authoritative lease and protected-effect state. PFC #1, PFC #2, and PFC #3 are individually authorized only as bounded synthetic slices. PFC #4+, broader Phase 1, customer execution, production execution, and real lease-system integration are not authorized. All three slices are local level-1 reference experiments. They do not establish provider portability or change Gate A public-incident evidence.
 
 Canonical flow:
 detect applicability
