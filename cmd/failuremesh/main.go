@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"os"
 
+	"github.com/SamudralaAjaykumarrr/failuremesh/internal/historical/iceberg16282"
 	"github.com/SamudralaAjaykumarrr/failuremesh/internal/pfc2"
 	"github.com/SamudralaAjaykumarrr/failuremesh/internal/pfc3"
 	"github.com/SamudralaAjaykumarrr/failuremesh/internal/phase1"
@@ -20,6 +22,9 @@ func main() {
 func run() error {
 	if len(os.Args) < 2 {
 		return fmt.Errorf("usage: failuremesh init|reset|match|plan|run [vulnerable|remediated], or failuremesh pfc2|pfc3 init|reset|match|plan|run [vulnerable|remediated]")
+	}
+	if os.Args[1] == "historical" {
+		return runHistorical()
 	}
 	if os.Args[1] == "pfc3" {
 		return runPFC3()
@@ -84,6 +89,64 @@ func run() error {
 	}
 	ev := phase1.Run(ctx, db, manifest, s, mode == "remediated")
 	return out(phase1.Verify(ev))
+}
+
+func runHistorical() error {
+	if len(os.Args) != 4 || os.Args[2] != "iceberg-16282" {
+		return fmt.Errorf("usage: failuremesh historical iceberg-16282 match|plan|init|reset|run|verify")
+	}
+	command := os.Args[3]
+	b, e := os.ReadFile("docs/validation/historical-reproductions/001-iceberg-16282/source-record.md")
+	if e != nil {
+		return e
+	}
+	digest := fmt.Sprintf("%x", sha256.Sum256(b))
+	a := iceberg16282.ReferenceAC()
+	d := iceberg16282.Evaluate(a)
+	out := func(v any) error {
+		b, e := json.MarshalIndent(v, "", "  ")
+		if e != nil {
+			return e
+		}
+		fmt.Println(string(b))
+		return nil
+	}
+	if command == "match" {
+		return out(d)
+	}
+	m, e := iceberg16282.Compile(a, d, digest)
+	if e != nil {
+		return e
+	}
+	p := iceberg16282.Plan(m)
+	if command == "plan" {
+		return out(struct {
+			Manifest iceberg16282.Manifest   `json:"manifest"`
+			Safety   iceberg16282.PlanResult `json:"safety"`
+		}{m, p})
+	}
+	if command != "init" && command != "reset" && command != "run" && command != "verify" {
+		return fmt.Errorf("unknown historical command")
+	}
+	db, e := phase1.Open(os.Getenv("FAILUREMESH_DATABASE_URL"))
+	if e != nil {
+		return e
+	}
+	defer db.Close()
+	ctx := context.Background()
+	if command == "init" {
+		return iceberg16282.Init(ctx, db)
+	}
+	if command == "reset" {
+		return iceberg16282.Reset(ctx, db)
+	}
+	if !p.Approved {
+		return fmt.Errorf("historical safety plan denied")
+	}
+	if command == "run" {
+		return out(iceberg16282.VerifyAgainstDB(ctx, db, iceberg16282.Run(ctx, db, m, p)))
+	}
+	return out(iceberg16282.VerifyAgainstDB(ctx, db, iceberg16282.CaptureCurrent(ctx, db, m, p)))
 }
 
 func runPFC2() error {

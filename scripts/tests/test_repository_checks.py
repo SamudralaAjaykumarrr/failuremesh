@@ -18,7 +18,7 @@ class GateATests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
-        for relative in ("docs/company/canonical-baseline-v1.0.md", "docs/company/baseline-change-001-bounded-phase1-entry.md", "docs/company/baseline-change-002-bounded-pfc2-entry.md", "docs/company/baseline-change-003-bounded-pfc3-entry.md", "docs/phases/phase-1-first-vertical-slice.md", "HANDOFF.md"):
+        for relative in ("docs/company/canonical-baseline-v1.0.md", "docs/company/baseline-change-001-bounded-phase1-entry.md", "docs/company/baseline-change-002-bounded-pfc2-entry.md", "docs/company/baseline-change-003-bounded-pfc3-entry.md", "docs/company/baseline-change-004-nonblocking-validation-sequence.md", "docs/phases/phase-1-first-vertical-slice.md", "HANDOFF.md"):
             destination = self.root / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(REPOSITORY / relative, destination)
@@ -34,6 +34,10 @@ class GateATests(unittest.TestCase):
     def test_third_authorization_cannot_be_unbounded(self):
         self.replace_in("docs/company/baseline-change-003-bounded-pfc3-entry.md", "PFC #4+, broader Phase 1, customer execution, production execution, real lease-system integration, and family-3 Gate A promotion are **NOT AUTHORIZED**", "PFC #4+ is AUTHORIZED")
         self.assertTrue(any("third bounded authorization" in error for error in validate_gate_a.validate(self.root)))
+
+    def test_fourth_change_preserves_nonblocking_boundary(self):
+        self.replace_in("docs/company/baseline-change-004-nonblocking-validation-sequence.md", "historical incident reproduction may proceed in parallel with expert outreach", "historical reproduction replaces expert outreach")
+        self.assertTrue(any("non-blocking sequence" in error for error in validate_gate_a.validate(self.root)))
 
     def replace_in(self, relative, old, new):
         path = self.root / relative

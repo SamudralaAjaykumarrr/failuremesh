@@ -11,3 +11,5 @@ V0 is constrained to Go, PostgreSQL, Docker, one CLI, three reference services, 
 The first runnable reference flow and exact commands are documented in [Phase 1 local run](docs/phases/phase-1-local-run.md). The separately approved synthetic duplicate-delivery slice is documented in [PFC #2 local run](docs/phases/phase-1-pfc2-local-run.md).
 
 The separately approved [PFC #3 local run](docs/phases/phase-1-pfc3-local-run.md) demonstrates deterministic synthetic stale-worker fencing against PostgreSQL. It remains an L0 candidate and does not close the family-3 Gate A incident gap.
+
+The owner-approved [non-blocking validation sequence](docs/company/baseline-change-004-nonblocking-validation-sequence.md) permits [Historical Reproduction #001](docs/validation/historical-reproductions/001-iceberg-16282/comparison.md) in parallel with expert outreach. This incident-specific Go/PostgreSQL model compares Apache Iceberg issue #16282's reported replay mechanism with a local bounded run. It does not execute upstream Iceberg or add PFC #4; expert reviews remain outstanding.

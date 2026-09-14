@@ -1,0 +1,5 @@
+# Bounded reproduction
+
+Run `failuremesh historical iceberg-16282 match`, `plan`, `init`, `reset`, `run`, then `verify` with `FAILUREMESH_DATABASE_URL` set to an isolated local PostgreSQL database. `run` requires empty incident tables and an approved level-1 plan. The ordered steps are control event write; C1 consume; C1 table commit; commit confirmation; offset gap observation; C1 shutdown; C2 start; C2 resume before event; C2 reconsume the same event; C2 table commit; duplicate registration observation. No sleeps or random timing place the boundary.
+
+PostgreSQL is the proof authority. Durable event, offset/history, consumption, snapshot, registration, and trace rows are checked together. The comparison requires exactly one event ID and file identity, two consumption rows referring to that same event, unchanged offset through shutdown/recovery, distinct S1/S2, and the same file in both registrations. The exported verifier re-reads the database and rejects captured evidence if any authoritative row has changed. `verify` reads the current database; a clean reset is needed to repeat the run.

@@ -1,0 +1,53 @@
+{
+  "identity": "historical.iceberg-16282@1",
+  "source": "https://github.com/apache/iceberg/issues/16282",
+  "source_digest": "b0e3a444070ad031df689f3a8caa33851c8e319a94a4fe6e99c8420f747299d8",
+  "ac_digest": "023745024cdaccb3b881bd84c09d7e2430b5f67033dda051ffee47462b7b04ac",
+  "evidence_digest": "bc308ce69ddbc645e6eac39aa8738189f7997a89aae94ae8f671862483a244b6",
+  "comparison": "MATCH",
+  "recommendation": "PASS",
+  "reason": "same durable DATA_WRITTEN event replayed after an unchanged control offset; same file registered in two distinct PostgreSQL snapshots",
+  "elements": [
+    {
+      "public_source_claim": "One DATA_WRITTEN for file X",
+      "failuremesh_representation": "one durable event and stable identity",
+      "reproduction_observation": "one event row; both consumption rows reference it",
+      "match_status": "MATCH",
+      "limitation": "synthetic event and offset"
+    },
+    {
+      "public_source_claim": "C1 commits X into S1",
+      "failuremesh_representation": "first snapshot and registration",
+      "reproduction_observation": "S1 registration at step 3",
+      "match_status": "MATCH",
+      "limitation": "reference table model"
+    },
+    {
+      "public_source_claim": "offset not advanced before shutdown",
+      "failuremesh_representation": "durable committed offset below event offset",
+      "reproduction_observation": "offset remains 6 through shutdown trace and final row",
+      "match_status": "MATCH",
+      "limitation": "no Kafka broker"
+    },
+    {
+      "public_source_claim": "C2 resumes and reconsumes same event",
+      "failuremesh_representation": "recovery and replay rows",
+      "reproduction_observation": "second consumption uses same event ID, offset, and file",
+      "match_status": "MATCH",
+      "limitation": "sequential logical scheduling"
+    },
+    {
+      "public_source_claim": "same file appears in S1 and S2",
+      "failuremesh_representation": "two authoritative registrations",
+      "reproduction_observation": "one file-X in each distinct snapshot",
+      "match_status": "MATCH",
+      "limitation": "row-count symptom not reproduced"
+    }
+  ],
+  "limitations": [
+    "No exact Apache Iceberg 1.10.1 runtime, Kafka broker, GCS, or REST/JDBC catalog execution or conclusion.",
+    "No real coordinator scheduling or reproduction of the reported approximately 20-minute race.",
+    "No proof of every upstream causal detail, upstream fix, general family-10 portability, customer applicability, production readiness, or market validation.",
+    "This is an incident-specific model, not a fourth generalized executable PFC."
+  ]
+}
