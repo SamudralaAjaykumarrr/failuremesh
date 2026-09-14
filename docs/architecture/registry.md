@@ -1,0 +1,7 @@
+# Registry and versioned knowledge
+
+The registry stores PFC identity/version, provenance, verification history, architecture-family applicability evidence, supported adapter references, evidence pointers/digests, signatures, and confidentiality classification. It must preserve historical versions and distinguish candidate contracts from verified ones. A published PFC version is immutable in substance; corrections create a new version with a supersession link. Verification level is attached to evidence and scope, not simply asserted by an author.
+
+L0 CANDIDATE means extracted but never reproduced. L1 REPRODUCED means reproduced against a reference implementation. L2 VERIFIED means repeated deterministic reproduction with stable evidence. L3 PORTABLE means verified across materially different implementations. L4 FIELD VERIFIED means executed across multiple independent customer architecture families. Promotion requires the specified evidence; a simulator-only Phase 1 result cannot establish L3 or L4.
+
+The registry is not a channel for raw customer material. Private PFCs and local execution evidence stay within their approved boundary. Shared generalized structural information and PFCs need explicit artifact-specific approval, provenance, redaction review, and access policy. The baseline's likely open-source/commercial split is a future packaging hypothesis; Phase 0 does not implement a service or governance plane.
