@@ -1,0 +1,16 @@
+{
+  "id": "pfc.timeout-after-external-commit",
+  "version": "1.0.0",
+  "family": "timeout after external commit",
+  "lifecycle": "candidate",
+  "verification_level": "L0 CANDIDATE",
+  "provenance": "Gate A family 1 mechanism mapping; synthetic Phase 1 experiment is separate evidence",
+  "prerequisites": ["external_effect", "post_commit_uncertainty", "post_commit_fault_placeable", "same_operation_retry", "effect_ledger_observable"],
+  "control_under_test": "durable provider idempotency keyed by logical operation ID",
+  "causal_sequence": ["caller requests one logical payment", "provider durably commits effect", "response is lost before caller success", "caller retries same logical payment", "provider may commit another effect"],
+  "forbidden_outcome": "more than one committed provider effect for one logical payment operation",
+  "invariant": "at most one committed provider effect per logical payment operation",
+  "experiment": {"fault": "DROP_RESPONSE_AFTER_REMOTE_COMMIT", "attempts": 2, "concurrency": 1},
+  "proof_requirements": ["authoritative complete ledger", "ordered commit-before-loss", "caller-observed loss before retry", "same logical operation identity", "all attempts and effects observed"],
+  "safety_ceiling": 1
+}

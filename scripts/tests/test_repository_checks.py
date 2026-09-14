@@ -63,8 +63,8 @@ class GateATests(unittest.TestCase):
 
     def test_authorization_does_not_imply_reproduction_or_verdict(self):
         self.assertEqual([], validate_gate_a.validate(self.root))
-        self.replace_in("HANDOFF.md", "No product code or FailureMesh reproduction exists yet; no applicability or execution verdict has been earned", "FailureMesh reproduced the incident and issued EXPOSED")
-        self.assertTrue(any("no reproduction or verdict" in error for error in validate_gate_a.validate(self.root)))
+        self.replace_in("HANDOFF.md", "Local synthetic applicability was APPLICABLE for both reference configurations; the vulnerable PostgreSQL run earned EXPOSED and the remediated bounded rerun earned scoped PROVEN_RESILIENT. No customer verdict has been earned", "FailureMesh issued an unscoped customer verdict")
+        self.assertTrue(any("scoped synthetic results" in error for error in validate_gate_a.validate(self.root)))
 
     def test_missing_incident_fails(self):
         (self.root / "docs/validation/gate-a/incidents/01-timeout-after-external-commit.md").unlink()
