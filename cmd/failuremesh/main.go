@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/SamudralaAjaykumarrr/failuremesh/internal/pfc2"
+	"github.com/SamudralaAjaykumarrr/failuremesh/internal/pfc3"
 	"github.com/SamudralaAjaykumarrr/failuremesh/internal/phase1"
 )
 
@@ -18,7 +19,10 @@ func main() {
 }
 func run() error {
 	if len(os.Args) < 2 {
-		return fmt.Errorf("usage: failuremesh init|reset|match|plan|run [vulnerable|remediated], or failuremesh pfc2 init|reset|match|plan|run [vulnerable|remediated]")
+		return fmt.Errorf("usage: failuremesh init|reset|match|plan|run [vulnerable|remediated], or failuremesh pfc2|pfc3 init|reset|match|plan|run [vulnerable|remediated]")
+	}
+	if os.Args[1] == "pfc3" {
+		return runPFC3()
 	}
 	if os.Args[1] == "pfc2" {
 		return runPFC2()
@@ -141,4 +145,65 @@ func runPFC2() error {
 		return fmt.Errorf("safety plan denied: %s", s.Reason)
 	}
 	return out(pfc2.VerifyAgainstDB(ctx, db, pfc2.Run(ctx, db, m, s, mode == "remediated")))
+}
+
+func runPFC3() error {
+	if len(os.Args) < 3 {
+		return fmt.Errorf("usage: failuremesh pfc3 init|reset|match|plan|run [vulnerable|remediated]")
+	}
+	command := os.Args[2]
+	mode := "vulnerable"
+	if len(os.Args) > 3 {
+		mode = os.Args[3]
+	}
+	if mode != "vulnerable" && mode != "remediated" {
+		return fmt.Errorf("unsupported mode")
+	}
+	p, err := pfc3.Load("contracts/stale-worker-after-lease-expiry.v1.json")
+	if err != nil {
+		return err
+	}
+	a := pfc3.ReferenceAC(mode == "remediated")
+	match := pfc3.Evaluate(p, a)
+	out := func(v any) error {
+		b, e := json.MarshalIndent(v, "", "  ")
+		if e != nil {
+			return e
+		}
+		fmt.Println(string(b))
+		return nil
+	}
+	if command == "match" {
+		return out(match)
+	}
+	m, err := pfc3.Compile(p, a, match)
+	if err != nil {
+		return err
+	}
+	s := pfc3.Plan(p, m)
+	if command == "plan" {
+		return out(struct {
+			Manifest pfc3.Manifest   `json:"manifest"`
+			Safety   pfc3.SafetyPlan `json:"safety"`
+		}{m, s})
+	}
+	if command != "init" && command != "reset" && command != "run" {
+		return fmt.Errorf("unknown command")
+	}
+	db, err := phase1.Open(os.Getenv("FAILUREMESH_DATABASE_URL"))
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	ctx := context.Background()
+	if command == "init" {
+		return pfc3.Init(ctx, db)
+	}
+	if command == "reset" {
+		return pfc3.Reset(ctx, db)
+	}
+	if !s.Approved {
+		return fmt.Errorf("safety plan denied: %s", s.Reason)
+	}
+	return out(pfc3.VerifyAgainstDB(ctx, db, pfc3.Run(ctx, db, m, s, mode == "remediated")))
 }
