@@ -1,0 +1,16 @@
+{
+  "id": "pfc.duplicate-queue-delivery",
+  "version": "1.0.0",
+  "family": "duplicate queue delivery",
+  "lifecycle": "candidate",
+  "verification_level": "L0 CANDIDATE",
+  "provenance": "Gate A family 2 mechanism mapping; synthetic execution is separate from public incident evidence",
+  "prerequisites": ["queue_delivery", "duplicate_possible", "stable_message_identity", "durable_consumer_effect", "same_message_redelivery", "effect_ledger_observable"],
+  "control_under_test": "durable consumer idempotency keyed by run and logical message ID",
+  "causal_sequence": ["one logical message published", "delivery one reaches consumer and commits effect", "delivery one acknowledged", "duplicate operation injects the same logical message", "delivery two reaches consumer and may commit another effect"],
+  "forbidden_outcome": "more than one committed consumer effect for one logical message",
+  "invariant": "at most one committed consumer effect per logical message",
+  "experiment": {"fault": "DUPLICATE_OPERATION_MESSAGE", "attempts": 2, "concurrency": 1},
+  "proof_requirements": ["complete authoritative PostgreSQL effect ledger", "same logical message in both deliveries", "ordered duplicate injection after first acknowledgement", "both delivery attempts reach consumer", "dedupe references first committed effect when remediated"],
+  "safety_ceiling": 1
+}

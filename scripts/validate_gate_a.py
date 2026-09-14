@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-BASELINE_SHA256 = "4dac0cacad24bddf8d62322416becc723c0f6aa652929983d1874c9c563ec103"
+BASELINE_SHA256 = "5ab642d9c28e324c7e979a97086c5817e2d1c8687ba0ab392e818e9c7e1ab3d2"
 INCIDENTS = (
     "01-timeout-after-external-commit.md",
     "02-duplicate-queue-delivery.md",
@@ -134,6 +134,9 @@ def validate(root=ROOT):
     disposition = read(root, str(gate / "disposition.md"), errors)
     phase = read(root, "docs/phases/phase-1-first-vertical-slice.md", errors)
     change = read(root, "docs/company/baseline-change-001-bounded-phase1-entry.md", errors)
+    second_change = read(root, "docs/company/baseline-change-002-bounded-pfc2-entry.md", errors)
+    for pattern, label in ((r"^# PROPOSED BASELINE CHANGE$", "second baseline change label"), (r"APPROVED on 2026-09-14", "second explicit approval"), (r"Gate A remains \*\*REVISE\*\*", "second change preserves REVISE"), (r"qualifying public observed incidents 8/10", "second change preserves incident count"), (r"families 1 and 3 unresolved", "second change preserves unresolved families"), (r"Broader Phase 1, other PFCs, customer execution, real queue integrations, uncontrolled chaos, and production execution are \*\*NOT AUTHORIZED\*\*", "second bounded authorization")):
+        require(second_change, pattern, label, "docs/company/baseline-change-002-bounded-pfc2-entry.md", errors, re.IGNORECASE | re.MULTILINE)
     rows = re.findall(r"^\| \[(\d+) [^]]+\]\(incidents/[^)]+\) \|[^\n]+$", decision, re.MULTILINE)
     if [int(number) for number in rows] != list(range(1, 11)):
         errors.append(f"{gate / 'decision.md'}: expected decision rows for families 1 through 10 in order")
@@ -150,7 +153,7 @@ def validate(root=ROOT):
     for content, relative, patterns in checks:
         for pattern, label in patterns:
             require(content, pattern, label, relative, errors, re.IGNORECASE | re.MULTILINE)
-    current = "\n".join((handoff, disposition, phase, change))
+    current = "\n".join((handoff, disposition, phase, change, second_change))
     forbidden = (
         (r"\bGate A\s*(?::|remains|is|=)\s*GO\b", "false Gate A GO"),
         (r"\b(?:qualifying|canonical)\s+(?:public\s+)?(?:observed\s+)?incidents?\s*(?::|is|are|remains|coverage is|coverage remains)\s*10/10\b", "false incident coverage"),
