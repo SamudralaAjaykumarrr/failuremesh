@@ -1,0 +1,11 @@
+# Gate A — corpus and reference architecture bootstrap
+
+This is a pre-implementation review of the [canonical first ten families](../../company/canonical-baseline-v1.0.md). Each record is an **L0 CANDIDATE**, not a verified PFC. The public source establishes only statements labeled SOURCE-ESTABLISHED FACT. Proposed experiments and invariants are hypotheses for future validation, never reports of FailureMesh execution. A family match does not establish applicability to any customer.
+
+The [fit review](abstraction-fit.md) compares the ten records; the [decision](decision.md) records the gate result. Three conceptual architecture specifications exercise different structural semantics. No source below supplies customer evidence, FailureMesh reproducibility, observer completeness, or portability proof. `UNKNOWN` is retained wherever the source is silent.
+
+The mechanism-fit corpus accepts public incidents, project bug reports, reproductions, and authoritative technical analyses. An exact-family L0 match requires the source to establish the defining causal mechanism, not every downstream forbidden outcome. Those downstream effects remain `UNKNOWN` unless evidenced. The separate canonical milestone requires ten real publicly documented incidents or observed operational failures; synthetic reproductions and analyses alone do not count. Source class and incident eligibility are audited in the [decision](decision.md).
+
+The earlier focused repairs produced **10/10 exact-family L0 mechanism mappings**. They did not complete the canonical incident milestone. The current audit counts **8/10 public incidents or observed operational failures**; families 1 and 3 still lack qualifying incident evidence. WordPress's injected Playground reproduction, and HBase's project race analyses remain useful mechanism evidence; RabbitMQ's formal analysis and chaos pilot remain useful for family 10 alongside an Apache Iceberg production incident. Official Stripe and AWS mechanism documentation is supplementary. The [REVISE decision](decision.md) does not authorize Phase 1.
+
+The final targeted incident-search pass is complete. The family-1 and family-3 gaps are recorded as unresolved, and no further generic incident-search loop is recommended.
