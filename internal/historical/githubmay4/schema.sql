@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS historical_github_runs (manifest_digest text PRIMARY KEY, complete boolean NOT NULL);
+CREATE TABLE IF NOT EXISTS historical_github_capacity (domain text PRIMARY KEY, units integer NOT NULL CHECK (units>0));
+CREATE TABLE IF NOT EXISTS historical_github_workloads (id text PRIMARY KEY, domain text NOT NULL REFERENCES historical_github_capacity(domain), units integer NOT NULL CHECK (units>0), start_tick integer NOT NULL, release_tick integer NOT NULL CHECK (release_tick>start_tick));
+CREATE TABLE IF NOT EXISTS historical_github_capacity_history (tick integer PRIMARY KEY, domain text NOT NULL REFERENCES historical_github_capacity(domain), migration_units integer NOT NULL, production_units integer NOT NULL, occupied integer NOT NULL, available integer NOT NULL);
+CREATE TABLE IF NOT EXISTS historical_github_dependencies (from_actor text NOT NULL, to_actor text NOT NULL, domain text NOT NULL REFERENCES historical_github_capacity(domain), PRIMARY KEY(from_actor,to_actor));
+CREATE TABLE IF NOT EXISTS historical_github_requests (id text PRIMARY KEY, service text NOT NULL, domain text NOT NULL REFERENCES historical_github_capacity(domain), arrival_tick integer NOT NULL, deadline_tick integer NOT NULL, wait_tick integer NOT NULL, decision_tick integer NOT NULL, outcome text NOT NULL);
+CREATE TABLE IF NOT EXISTS historical_github_trace (step integer PRIMARY KEY, tick integer NOT NULL, kind text NOT NULL, actor text NOT NULL);

@@ -1,0 +1,62 @@
+{
+  "identity": "historical.github-may4-cascade@1",
+  "source": "https://github.blog/news-insights/company-news/github-availability-report-may-2026/",
+  "source_digest": "227daf8d66e99c38ee3092ab377689d85f11f2487b17fed0fe9889995743a019",
+  "ac_digest": "9c039dab8d5613fccaff8bfca486b660f9bb9367e1af0a4314a5693daf432828",
+  "evidence_digest": "785f6037bcf46e822f1d45db6acdb5a21a02b0b5873558f348fffcbb82fa342f",
+  "applicability": "APPLICABLE",
+  "scope": "SERVICE-LEVEL CASCADE",
+  "comparison": "MATCH",
+  "recommendation": "PASS",
+  "reason": "PostgreSQL proves bounded shared-capacity saturation, multi-service deadline crossings, and recovery after migration release",
+  "elements": [
+    {
+      "public_source_claim": "Migration and production traffic overlapped",
+      "failuremesh_representation": "two workloads in one capacity domain",
+      "authoritative_local_observation": "migration 2 + production 2 at ticks 2–5",
+      "match_status": "MATCH",
+      "limitation": "synthetic occupancy units"
+    },
+    {
+      "public_source_claim": "Shared database connection capacity saturated",
+      "failuremesh_representation": "finite primary-db ledger",
+      "authoritative_local_observation": "capacity 4, occupied 4, available 0 at affected arrivals",
+      "match_status": "MATCH",
+      "limitation": "synthetic capacity; no GitHub pool telemetry"
+    },
+    {
+      "public_source_claim": "Query/request contention",
+      "failuremesh_representation": "bounded waiting requests",
+      "authoritative_local_observation": "three requests waited at tick 3 with zero available capacity",
+      "match_status": "MATCH",
+      "limitation": "logical waiting, not physical query measurements"
+    },
+    {
+      "public_source_claim": "Multiple services experienced latency/timeouts",
+      "failuremesh_representation": "three service classes with deadlines",
+      "authoritative_local_observation": "pull, secondary, and dependent deadlines crossed at ticks 4–5",
+      "match_status": "MATCH",
+      "limitation": "generic synthetic classes, no individual GitHub traces"
+    },
+    {
+      "public_source_claim": "Shared dependencies contributed to degradation",
+      "failuremesh_representation": "explicit dependency edges to primary-db",
+      "authoritative_local_observation": "all three affected classes share primary-db; dependent class degraded",
+      "match_status": "MATCH",
+      "limitation": "no unsupported service-to-service edge"
+    },
+    {
+      "public_source_claim": "Pausing migration preceded recovery",
+      "failuremesh_representation": "release tick and later request",
+      "authoritative_local_observation": "migration releases at 6; available 2 and recovery request COMPLETE at 7",
+      "match_status": "MATCH",
+      "limitation": "logical recovery, not GitHub's elapsed time"
+    }
+  ],
+  "limitations": [
+    "First-party GitHub report is not independently audited by FailureMesh.",
+    "Pool size, demand, logical ticks, deadlines, requests, and graph are SYNTHETIC LOCAL MODEL PARAMETERS; no exact GitHub traces or topology.",
+    "No real GitHub services, traffic, migration, pool exhaustion, latency, or recovery timing.",
+    "No general portability, customer readiness, production readiness, expert-validation, or PFC #4 claim."
+  ]
+}

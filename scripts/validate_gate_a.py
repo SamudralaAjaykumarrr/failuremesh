@@ -143,6 +143,21 @@ def validate(root=ROOT):
     fourth_change = read(root, "docs/company/baseline-change-004-nonblocking-validation-sequence.md", errors)
     for pattern, label in ((r"^# PROPOSED BASELINE CHANGE$", "fourth baseline change label"), (r"APPROVED on 2026-09-14", "fourth explicit approval"), (r"historical incident reproduction may proceed in parallel with expert outreach", "non-blocking sequence"), (r"Gate A remains \*\*REVISE\*\*", "fourth change preserves REVISE"), (r"PFC #4", "fourth PFC boundary"), (r"expert review complete", "expert review boundary")):
         require(fourth_change, pattern, label, "docs/company/baseline-change-004-nonblocking-validation-sequence.md", errors, re.IGNORECASE | re.MULTILINE)
+    fifth_path = "docs/company/baseline-change-005-historical-reproduction-002.md"
+    fifth_change = read(root, fifth_path, errors)
+    # Deliberately pin the approved record's structural statements, not prose semantics.
+    for statement, label in (
+        ("# PROPOSED BASELINE CHANGE", "heading"),
+        ("Status: **APPROVED on 2026-09-15** by the project owner:", "owner approval"),
+        ("> Approve Historical Reproduction #002 as the next bounded validation milestone.", "Historical #002 authorization"),
+        ("> It must use a materially different external failure mechanism from", "different mechanism boundary"),
+        ("> Historical Reproduction #001, remain local and deterministic, use public", "local boundary"),
+        ("> evidence only, and must not authorize PFC #4, customer execution, or", "execution boundary"),
+        ("> production execution.", "production boundary"),
+        ("Historical Reproduction #002 may proceed as the second local bounded historical transfer test, in parallel with the still-incomplete expert-review track. #001 tested recovery replay and duplicate durable registration. #002 tests shared dependency capacity saturation, latency, and timeout propagation. This record extends the approved non-blocking validation sequence by one named incident-specific milestone; it does not authorize a generalized executable contract.", "bounded milestone and incomplete expert review"),
+        ("This bounded comparison can test capacity, graph, deadline, and recovery evidence with a DB-backed verifier. Gate A remains REVISE, mechanism fit 10/10, qualifying public incidents 8/10, families 1 and 3 unresolved, and generic incident search CLOSED. It neither changes the Gate A count nor authorizes PFC #4, a fourth generalized executable PFC, Historical #003, broader Phase 1, customer or production execution, live GitHub infrastructure, real traffic, Gate A promotion, or expert-validation completion. Historical #001 remains landed and independently reviewed. No general portability, exact upstream reproduction, customer readiness, or market claim follows.", "unchanged governance boundaries"),
+    ):
+        require(fifth_change, "^" + re.escape(statement) + "$", "fifth change " + label, fifth_path, errors, re.MULTILINE)
     rows = re.findall(r"^\| \[(\d+) [^]]+\]\(incidents/[^)]+\) \|[^\n]+$", decision, re.MULTILINE)
     if [int(number) for number in rows] != list(range(1, 11)):
         errors.append(f"{gate / 'decision.md'}: expected decision rows for families 1 through 10 in order")
@@ -159,8 +174,10 @@ def validate(root=ROOT):
     for content, relative, patterns in checks:
         for pattern, label in patterns:
             require(content, pattern, label, relative, errors, re.IGNORECASE | re.MULTILINE)
-    current = "\n".join((handoff, disposition, phase, change, second_change, third_change, fourth_change))
+    current = "\n".join((handoff, disposition, phase, change, second_change, third_change, fourth_change, fifth_change))
     forbidden = (
+        (r"\b(?:Historical #003|PFC #4) (?:is|:|remains) AUTHORIZED\b", "unauthorized next milestone"),
+        (r"\bexpert[- ](?:outreach|review|validation) (?:is|was|remains|has been) complet(?:e|ed)\b", "false expert completion"),
         (r"\bGate A\s*(?::|remains|is|=)\s*GO\b", "false Gate A GO"),
         (r"\b(?:qualifying|canonical)\s+(?:public\s+)?(?:observed\s+)?incidents?\s*(?::|is|are|remains|coverage is|coverage remains)\s*10/10\b", "false incident coverage"),
         (r"\b(?:ten[- ](?:public[- ]observed[- ])?incident|incident-validation) milestone (?:is|remains) complete\b", "false milestone completion"),

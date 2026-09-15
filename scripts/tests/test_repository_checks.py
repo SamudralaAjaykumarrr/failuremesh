@@ -18,7 +18,7 @@ class GateATests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
-        for relative in ("docs/company/canonical-baseline-v1.0.md", "docs/company/baseline-change-001-bounded-phase1-entry.md", "docs/company/baseline-change-002-bounded-pfc2-entry.md", "docs/company/baseline-change-003-bounded-pfc3-entry.md", "docs/company/baseline-change-004-nonblocking-validation-sequence.md", "docs/phases/phase-1-first-vertical-slice.md", "HANDOFF.md"):
+        for relative in ("docs/company/canonical-baseline-v1.0.md", "docs/company/baseline-change-001-bounded-phase1-entry.md", "docs/company/baseline-change-002-bounded-pfc2-entry.md", "docs/company/baseline-change-003-bounded-pfc3-entry.md", "docs/company/baseline-change-004-nonblocking-validation-sequence.md", "docs/company/baseline-change-005-historical-reproduction-002.md", "docs/phases/phase-1-first-vertical-slice.md", "HANDOFF.md"):
             destination = self.root / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(REPOSITORY / relative, destination)
@@ -38,6 +38,31 @@ class GateATests(unittest.TestCase):
     def test_fourth_change_preserves_nonblocking_boundary(self):
         self.replace_in("docs/company/baseline-change-004-nonblocking-validation-sequence.md", "historical incident reproduction may proceed in parallel with expert outreach", "historical reproduction replaces expert outreach")
         self.assertTrue(any("non-blocking sequence" in error for error in validate_gate_a.validate(self.root)))
+
+    def test_fifth_change_governance_mutations(self):
+        relative = "docs/company/baseline-change-005-historical-reproduction-002.md"
+        path = self.root / relative
+        original = path.read_text()
+        mutations = (
+            ("APPROVED on 2026-09-15", "APPROVED on 2026-09-14"),
+            ("Historical #003,", "Historical #003 is AUTHORIZED,"),
+            ("nor authorizes PFC #4,", "authorizes PFC #4,"),
+            ("still-incomplete expert-review track", "completed expert-review track"),
+            ("or expert-validation completion", "and establishes expert-validation completion"),
+            ("Gate A remains REVISE", "Gate A remains GO"),
+            ("mechanism fit 10/10", "mechanism fit 9/10"),
+            ("qualifying public incidents 8/10", "qualifying public incidents 10/10"),
+            ("families 1 and 3 unresolved", "families 1 and 3 resolved"),
+        )
+        for old, new in mutations:
+            with self.subTest(new=new):
+                path.write_text(original)
+                self.replace_in(relative, old, new)
+                self.assertTrue(any("fifth change" in error for error in validate_gate_a.validate(self.root)))
+        for claim in ("Historical #003 is AUTHORIZED.", "PFC #4 is AUTHORIZED.", "Expert outreach is completed.", "Expert review is complete.", "Customer execution is AUTHORIZED.", "Production execution is AUTHORIZED."):
+            with self.subTest(claim=claim):
+                path.write_text(original + "\n" + claim + "\n")
+                self.assertTrue(any("contradictory claim" in error for error in validate_gate_a.validate(self.root)))
 
     def replace_in(self, relative, old, new):
         path = self.root / relative
