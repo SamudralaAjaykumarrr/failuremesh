@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/SamudralaAjaykumarrr/failuremesh/internal/historical/githubmay4"
 	"github.com/SamudralaAjaykumarrr/failuremesh/internal/historical/iceberg16282"
 	"github.com/SamudralaAjaykumarrr/failuremesh/internal/pfc2"
 	"github.com/SamudralaAjaykumarrr/failuremesh/internal/pfc3"
@@ -92,8 +93,14 @@ func run() error {
 }
 
 func runHistorical() error {
-	if len(os.Args) != 4 || os.Args[2] != "iceberg-16282" {
-		return fmt.Errorf("usage: failuremesh historical iceberg-16282 match|plan|init|reset|run|verify")
+	if len(os.Args) != 4 {
+		return fmt.Errorf("usage: failuremesh historical iceberg-16282|github-may4-cascade match|plan|init|reset|run|verify")
+	}
+	if os.Args[2] == "github-may4-cascade" {
+		return runHistoricalGitHub(os.Args[3])
+	}
+	if os.Args[2] != "iceberg-16282" {
+		return fmt.Errorf("unknown historical incident")
 	}
 	command := os.Args[3]
 	b, e := os.ReadFile("docs/validation/historical-reproductions/001-iceberg-16282/source-record.md")
@@ -147,6 +154,60 @@ func runHistorical() error {
 		return out(iceberg16282.VerifyAgainstDB(ctx, db, iceberg16282.Run(ctx, db, m, p)))
 	}
 	return out(iceberg16282.VerifyAgainstDB(ctx, db, iceberg16282.CaptureCurrent(ctx, db, m, p)))
+}
+
+func runHistoricalGitHub(command string) error {
+	b, e := os.ReadFile("docs/validation/historical-reproductions/002-github-may4-cascade/source-record.md")
+	if e != nil {
+		return e
+	}
+	digest := fmt.Sprintf("%x", sha256.Sum256(b))
+	a := githubmay4.ReferenceAC()
+	d := githubmay4.Evaluate(a)
+	out := func(v any) error {
+		b, e := json.MarshalIndent(v, "", "  ")
+		if e != nil {
+			return e
+		}
+		fmt.Println(string(b))
+		return nil
+	}
+	if command == "match" {
+		return out(d)
+	}
+	m, e := githubmay4.Compile(a, d, digest)
+	if e != nil {
+		return e
+	}
+	p := githubmay4.Plan(m)
+	if command == "plan" {
+		return out(struct {
+			Manifest githubmay4.Manifest   `json:"manifest"`
+			Safety   githubmay4.PlanResult `json:"safety"`
+		}{m, p})
+	}
+	if command != "init" && command != "reset" && command != "run" && command != "verify" {
+		return fmt.Errorf("unknown historical command")
+	}
+	db, e := phase1.Open(os.Getenv("FAILUREMESH_DATABASE_URL"))
+	if e != nil {
+		return e
+	}
+	defer db.Close()
+	ctx := context.Background()
+	if command == "init" {
+		return githubmay4.Init(ctx, db)
+	}
+	if command == "reset" {
+		return githubmay4.Reset(ctx, db)
+	}
+	if !p.Approved {
+		return fmt.Errorf("historical safety plan denied")
+	}
+	if command == "run" {
+		return out(githubmay4.VerifyAgainstDB(ctx, db, githubmay4.Run(ctx, db, m, p)))
+	}
+	return out(githubmay4.VerifyAgainstDB(ctx, db, githubmay4.CaptureCurrent(ctx, db, m, p)))
 }
 
 func runPFC2() error {
