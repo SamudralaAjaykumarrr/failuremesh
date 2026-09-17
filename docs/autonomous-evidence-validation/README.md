@@ -6,6 +6,8 @@ FailureMesh turns real software failures into portable, evidence-backed failure 
 
 The separately owner-authorized [Phase 2A implementation](phase-2a-implementation.md) now provides the bounded local source/claim substrate and synthetic-only assessment rule. The foundation below remains the approved design; later stages remain unimplemented and separately authorized.
 
+The owner-authorized [Phase 2B curated corpus design](phase-2b-curated-corpus.md) now specifies manual intake, origin clustering, selection, exposure, rights and frozen manifests for independent architecture review. It delivers documentation only; tooling implementation and real corpus collection remain separately unauthorized.
+
 ## Read the design
 
 | Document | Authority within this package |
