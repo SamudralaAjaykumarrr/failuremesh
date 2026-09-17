@@ -7,7 +7,7 @@ Status: planning only. Each stage below requires its own explicit authorization 
 | Stage | Reviewable deliverable and exit evidence | Authorization boundary |
 | --- | --- | --- |
 | Foundation (this task) | Evidence, evaluation, mutations, proof, acceptance and failure design; documentation checks | Architecture only; independent review is recommended, not claimed complete |
-| Curated corpus tooling | Manual candidate intake, provenance/rights/duplicate/split manifests; approximately 25-incident selection register | No crawler/bulk ingestion or automatic Gate A promotion |
+| Curated corpus tooling | [Phase 2B design package](phase-2b-curated-corpus.md) prepared for independent architecture review; future manual intake and approximately 25-incident selection register | Design only now; implementation and collection need separate authorization; no crawler/bulk ingestion or automatic Gate A promotion |
 | Architecture packet builder | Broad independent inventory, frozen natural-source packets, AC projection with unknowns and exposure record | Public/synthetic only; no customer scan |
 | Deterministic claim validator | Versioned predicate/evidence rules, six-state assessments, conflict/freshness/entailment tests | No generic prose truth oracle; unsupported predicates abstain |
 | Blind match arena | Registered manifests/receipts, withheld expectations, case-level outputs and dispute history | Static evaluation; any evaluator changes separately scoped |
