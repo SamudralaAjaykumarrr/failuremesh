@@ -4,6 +4,8 @@ Status: **architecture specification for review; no implementation or new execut
 
 FailureMesh turns real software failures into portable, evidence-backed failure models that other systems can automatically evaluate and safely test before experiencing the same failure themselves. The thesis and product loop are preserved. The design removes external approval as a prerequisite for producing technical evidence within an explicitly authorized envelope. Experts remain useful critics; customers and design partners remain necessary for later commercial validation. Neither votes facts into truth.
 
+The separately owner-authorized [Phase 2A implementation](phase-2a-implementation.md) now provides the bounded local source/claim substrate and synthetic-only assessment rule. The foundation below remains the approved design; later stages remain unimplemented and separately authorized.
+
 ## Read the design
 
 | Document | Authority within this package |
