@@ -8,6 +8,8 @@ The separately owner-authorized [Phase 2A implementation](phase-2a-implementatio
 
 The owner-authorized [Phase 2B local register](phase-2b-implementation.md) implements the [curated corpus design](phase-2b-curated-corpus.md) for manually supplied metadata, origin clustering, selection, exposure, rights and frozen manifests. Synthetic acceptance fixtures only; independent implementation review is pending. Real corpus collection remains separately unauthorized.
 
+The next roadmap stage now has an [Architecture Packet Builder specification](architecture-packet-builder.md) for independent architecture review: broad source inventory, evidence-backed scoped facts and unknowns, deterministic AC projection, immutable packets, exposure inheritance and replay. This is documentation only. No builder implementation, real corpus, retrieval, customer scanning or additional execution is authorized, and a frozen packet issues no applicability or execution verdict.
+
 ## Read the design
 
 | Document | Authority within this package |
@@ -17,6 +19,7 @@ The owner-authorized [Phase 2B local register](phase-2b-implementation.md) imple
 | [Evaluation protocol](evaluation-protocol.md) | Freeze/registration, grading, corpus selection, leakage and metrics |
 | [Counterfactual model](counterfactual-model.md) | Deterministic mutations, conditional expectations, permanent counterexamples |
 | [Proof bundle](proof-bundle.md) | Content identity, evidence trust, replay and immutable history |
+| [Architecture Packet Builder](architecture-packet-builder.md) | Evidence intake/inventory, fact assessment, AC sidecar projection, packet lifecycle, exposure, deterministic verification and acceptance |
 | [Roadmap](roadmap.md) | Separately authorized future stages and unresolved decisions |
 
 ```text
