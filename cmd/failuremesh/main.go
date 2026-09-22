@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/SamudralaAjaykumarrr/failuremesh/internal/corpus"
 	"github.com/SamudralaAjaykumarrr/failuremesh/internal/historical/githubmay4"
 	"github.com/SamudralaAjaykumarrr/failuremesh/internal/historical/iceberg16282"
 	"github.com/SamudralaAjaykumarrr/failuremesh/internal/pfc2"
@@ -17,10 +18,16 @@ import (
 func main() {
 	if e := run(); e != nil {
 		fmt.Fprintln(os.Stderr, e)
+		if len(os.Args) > 1 && os.Args[1] == "corpus" {
+			os.Exit(corpus.ExitCode(e))
+		}
 		os.Exit(1)
 	}
 }
 func run() error {
+	if len(os.Args) > 1 && os.Args[1] == "corpus" {
+		return runCorpus(os.Args[2:])
+	}
 	if len(os.Args) < 2 {
 		return fmt.Errorf("usage: failuremesh init|reset|match|plan|run [vulnerable|remediated], or failuremesh pfc2|pfc3 init|reset|match|plan|run [vulnerable|remediated]")
 	}
